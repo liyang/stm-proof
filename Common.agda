@@ -5,7 +5,20 @@ module Level where
 open import Coinduction public using (∞; ♯_; ♭)
 open import Function public
 
+open import Function.Equality public using (_⟨$⟩_)
+
+module Equivalence where
+  open import Function.Equivalence public
+  open Equivalence public
+open Equivalence public using (Equivalence; equivalence; _⇔_; ⇔-setoid)
+
 open import Category.Applicative.Indexed public
+
+module Dec where
+  open import Relation.Nullary public
+  open import Relation.Nullary.Decidable public
+  open import Relation.Nullary.Product public
+open Dec public using (Dec; yes; no; ¬_; ⌊_⌋; _×-dec_)
 
 module RBin where
   open import Relation.Binary public
@@ -20,7 +33,7 @@ Setoid = RBin.Setoid Level.zero Level.zero
 
 module ≡ where
   open import Relation.Binary.PropositionalEquality public
-open ≡ public using (_≡_; _≢_; _≗_) renaming ([_] to Reveal)
+open ≡ public using (_≡_; _≢_; _≗_; [_])
 
 module ⊥ where
   open import Data.Empty public
@@ -42,23 +55,11 @@ module Vec where
   open import Data.Vec.Properties public
 
   lookup∘replicate : ∀ {X : Set} {N : ℕ} (i : Fin N) (x : X) → lookup i (replicate x) ≡ x
-  lookup∘replicate i x = op-pure x where open Morphism (lookup-morphism {Level.zero} i)
+  lookup∘replicate i = Morphism.op-pure (lookup-morphism i)
 
-  lookup∘update : ∀ {N} {X : Set} (i : Fin N) (vec : Vec X N) (x : X) → lookup i (vec [ i ]≔ x) ≡ x
-  lookup∘update zero (x ∷ xs) x′ = ≡.refl
-  lookup∘update (suc i) (x ∷ xs) x′ = lookup∘update i xs x′
-
-  lookup∘update′ : ∀ {N} {X : Set} {i j : Fin N} → i ≢ j → (vec : Vec X N) (m : X) → lookup i (vec [ j ]≔ m) ≡ lookup i vec
-  lookup∘update′ {i = zero} {zero} i≢j vec m = ⊥-elim (i≢j ≡.refl)
-  lookup∘update′ {i = zero} {suc i} i≢j (x ∷ xs) m = ≡.refl
-  lookup∘update′ {i = suc i} {zero} i≢j (x ∷ xs) m = ≡.refl
-  lookup∘update′ {i = suc i} {suc j} i≢j (x ∷ xs) m = lookup∘update′ (i≢j ∘ ≡.cong suc) xs m
-
-  ≗→≡ : ∀ {X : Set} {N : ℕ} {v v′ : Vec X N} → (∀ i → lookup i v ≡ lookup i v′) → v ≡ v′
-  ≗→≡ {v = []} {v′ = []} v≗v′ = ≡.refl
-  ≗→≡ {v = x ∷ xs} {v′ = x′ ∷ xs′} v≗v′ with v≗v′ zero
-  ≗→≡ {v = x ∷ xs} {v′ = .x ∷ xs′} v≗v′ | ≡.refl = ≡.cong (_∷_ x) (≗→≡ (v≗v′ ∘ suc))
-
+  module Pointwise where
+    open import Relation.Binary.Vec.Pointwise public
+  open Pointwise public using (Pointwise; Pointwise-≡)
 open Vec public using (Vec; []; _∷_)
 
 module List where
@@ -93,9 +94,3 @@ open ⊎ public using (_⊎_) renaming (inj₁ to inl; inj₂ to inr)
 module ⋆ where
   open import Data.Star public
 open ⋆ public using (Star; _◅◅_) renaming (ε to []; _◅_ to _∷_)
-
-module Dec where
-  open import Relation.Nullary public
-  open import Relation.Nullary.Decidable public
-  open import Relation.Nullary.Product public
-open Dec public using (Dec; yes; no; ¬_; ⌊_⌋; _×-dec_)
