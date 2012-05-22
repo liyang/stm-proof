@@ -181,6 +181,13 @@ s ⤇̸ = ∀ {α h h′s′} → α ⊢ h , s ⤇ h′s′ → ⊥
 ↣-Consistent (↣-writeE e↣e′) = ↣-Consistent e↣e′
 ↣-Consistent ↣-writeℕ = Equivalence.id
 
+↣⋆-Consistent : ∀ {h l l′ e e′} →
+  h  ⊢ l , e ↣⋆ l′ , e′ →
+  Consistent h l′ →
+  Consistent h l
+↣⋆-Consistent [] cons = cons
+↣⋆-Consistent (e↣e′ ∷ e′↣⋆e″) cons = Equivalence.from (↣-Consistent e↣e′) ⟨$⟩ ↣⋆-Consistent e′↣⋆e″ cons
+
 {-
 boo : ∀ {l h h′} v → let l′∧m = Read h l v in
   Consistent h (fst l′∧m) →
