@@ -114,12 +114,11 @@ infix 3 _↠⋆_
 _↠⋆_ : Rel (Heap × Combined)
 _↠⋆_ = Star (_⊢_↠_ τ)
 
-infix 3 _⊢_⤇_
-record _⊢_⤇_ (α : Action) (x x″ : Heap × Combined) : Set where
+infix 3 _⤇_
+record _⤇_ (x x″ : Heap × Combined) : Set where
   constructor ⤇:
   field
     {h′} : Heap
     {c′} : Combined
-    α≢τ : α ≢ τ
     c↠⋆c′ : x ↠⋆ h′ , c′
-    c′↠c″ : α ⊢ h′ , c′ ↠ x″
+    c′↠c″ : ☢ ⊢ h′ , c′ ↠ x″
