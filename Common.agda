@@ -10,7 +10,9 @@ open import Function.Equality public using (_⟨$⟩_)
 module Equivalence where
   open import Function.Equivalence public
   open Equivalence public
-open Equivalence public using (Equivalence; equivalence; _⇔_; ⇔-setoid)
+open Equivalence public
+  using (Equivalence; equivalence; _⇔_; ⇔-setoid)
+  renaming (_∘_ to _⟨∘⟩_)
 
 open import Category.Applicative.Indexed public
 
