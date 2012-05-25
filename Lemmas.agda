@@ -183,33 +183,32 @@ s ⤇̸ = ∀ {α h h′s′} → α ⊢ h , s ⤇ h′s′ → ⊥
 
 ↣⋆-Consistent : ∀ {h l l′ e e′} →
   h  ⊢ l , e ↣⋆ l′ , e′ →
+  Consistent h l ⇔ Consistent h l′
+↣⋆-Consistent [] = Equivalence.id
+↣⋆-Consistent (e↣e′ ∷ e′↣⋆e″) = ↣⋆-Consistent e′↣⋆e″ ⟨∘⟩ ↣-Consistent e↣e′
+
+{-
+↣⋆-Consistent : ∀ {h l l′ e e′} →
+  h  ⊢ l , e ↣⋆ l′ , e′ →
   Consistent h l′ →
   Consistent h l
 ↣⋆-Consistent [] cons = cons
 ↣⋆-Consistent (e↣e′ ∷ e′↣⋆e″) cons = Equivalence.from (↣-Consistent e↣e′) ⟨$⟩ ↣⋆-Consistent e′↣⋆e″ cons
+-}
 
 {-
 boo : ∀ {l h h′} v → let l′∧m = Read h l v in
   Consistent h (fst l′∧m) →
-  Consistent h′ l →
+  Consistent h′ (fst l′∧m) →
   Read h l v ≡ Read h′ l v
-boo {l} {h} {h′} v cons cons′ with Vec.lookup v (Logs.ω l)
+boo {l} {h} {h′} v cons cons′ with Vec.lookup v ω where open Logs l
 ... | ● m = ≡.refl
-... | ○ with Vec.lookup v (Logs.ρ l)
+... | ○ with Vec.lookup v ρ where open Logs l
 ...   | ● m = ≡.refl
 ...   | ○ = {!cons v (Vec.lookup v h′)!}
--}
 
-Contained : ∀ {h l e c′} → h ⊢ l , e ↣′ c′ → Set
-Contained ↣-ℕ = ⊤
-Contained (↣-R m b↣b′) = Contained b↣b′
-Contained (↣-L b a↣a′) = Contained a↣a′
-Contained {h} (↣-read l v) = l ≡ fst (Read h l v)
-Contained (↣-writeE e↣e′) = Contained e↣e′
-Contained ↣-writeℕ = ⊤
-
-moo : ∀ {h h′ l e l′ e′} →
-  Consistent h l′ →
+moo : ∀ {h h′ l l′ e e′} →
+  Consistent h  l′ →
   Consistent h′ l′ →
   h  ⊢  l , e  ↣′  l′ , e′ →
   h′ ⊢  l , e  ↣′  l′ , e′
@@ -218,15 +217,52 @@ moo cons cons′ (↣-R m b↣b′) = ↣-R m (moo cons cons′ b↣b′)
 moo cons cons′ (↣-L b a↣a′) = ↣-L b (moo cons cons′ a↣a′)
 moo cons cons′ (↣-writeE e↣e′) = ↣-writeE (moo cons cons′ e↣e′)
 moo cons cons′ ↣-writeℕ = ↣-writeℕ
-moo {h} {h′} cons cons′ (↣-read l v) = {!↣-read {h′} l v!}
+moo cons cons′ (↣-read l v) rewrite boo v cons cons′ = ↣-read l v
+-- IS THIS TRUE?
 
 bar : ∀ {h h′ l e l′ e′} →
   Consistent h  l′ →
   Consistent h′ l′ →
   h  ⊢ l , e ↣⋆ l′ , e′ →
   h′ ⊢ l , e ↣⋆ l′ , e′
-bar cons cons′ e↣e′ = {!!}
+bar cons cons′ [] = []
+bar cons cons′ (e↣e′ ∷ e′↣⋆e″) = {!e↣e′!}
+-}
 
+contained : ∀ {h l l′ m v} →
+  h ⊢ l , read v ↣′ l′ , # m →
+  Vec.lookup v (Logs.ω l′) ≡ ● m ⊎
+  Vec.lookup v (Logs.ρ l′) ≡ ● m
+contained (↣-read l v) with Vec.lookup v (Logs.ω l) | ≡.inspect (Vec.lookup v) (Logs.ω l)
+... | ● m | [ ω[v]≡m ] = inl ω[v]≡m
+... | ○   | _ with Vec.lookup v (Logs.ρ l) | ≡.inspect (Vec.lookup v) (Logs.ρ l)
+...   | ● m | [ ρ[v]≡m ] = inr ρ[v]≡m
+...   | ○   | _ = inr (Vec.lookup∘update v (Logs.ρ l) _)
+
+postulate
+  swap-heap : ∀ {h h′ R l e} →
+    Consistent h  l →
+    Consistent h′ l →
+    h  ⊢ ∅ , R ↣⋆ l , e →
+    h′ ⊢ ∅ , R ↣⋆ l , e
+
+↠⋆/↣-step : ∀ {R h l e h′ c′ h″ c″} →
+  h ⊢ ∅ , R ↣⋆ l , e →
+  h , ↣⟨ ● (R , l) , atomic e ⟩  ↠⋆  h′ , c′ →
+  ☢ ⊢  h′ , c′  ↠  h″ , c″ →
+  ∃₂ λ l′ m →
+  c′ ≡ ↣⟨ ● (R , l′) , atomic (# m) ⟩ ×
+  h′ ⊢  ∅ , R  ↣⋆  l′ , # m
+↠⋆/↣-step R↣⋆e [] (↠-↣ (↣-commit cons)) = _ , _ , ≡.refl , R↣⋆e
+↠⋆/↣-step R↣⋆e (↠-↣ (↣-abort ¬cons) ∷ c′↠⋆c″) c″↠c‴ = ↠⋆/↣-step [] c′↠⋆c″ c″↠c‴
+↠⋆/↣-step R↣⋆e (↠-↣ (↣-step e↣e′) ∷ c′↠⋆c″) c″↠c‴ = ↠⋆/↣-step (R↣⋆e ◅◅ e↣e′ ∷ []) c′↠⋆c″ c″↠c‴
+↠⋆/↣-step {h = h} {l = l} R↣⋆e (↠-↣ (↣-mutate h′) ∷ c′↠⋆c″) c″↠c‴ with Consistent? h′ l
+... | yes cons′ = ↠⋆/↣-step (swap-heap cons cons′ R↣⋆e) c′↠⋆c″ c″↠c‴ where
+  cons : Consistent h l
+  cons = Equivalence.to (↣⋆-Consistent R↣⋆e) ⟨$⟩ ∅-Consistent
+... | no ¬cons′ = {!!}
+
+{-
 ↠⋆/↣-step : ∀ {α R h l e h′ c′ h″ c″} →
   h ⊢ ∅ , R ↣⋆ l , e →
   α ≢ τ →
@@ -246,13 +282,13 @@ bar cons cons′ e↣e′ = {!!}
 ... | yes cons = ↠⋆/↣-step {!R↣⋆e!} α≢τ c′↠c″ c″↠c‴
 ... | no ¬cons = {!!}
 ↠⋆/↣-step R↣⋆e α≢τ (↠-↣ (↣-abort ¬cons) ∷ c′↠c″) c″↠c‴ = ↠⋆/↣-step [] α≢τ c′↠c″ c″↠c‴
+-}
 
 {- with cons?
 ... | yes c rewrite ≡.sym (Commit-Update c equiv)
   = _ , _ , ≡.refl , {!R↣⋆e!} , cons , {!!}
 ... | no ¬cons = {!⊥-elim (¬cons cons)!}
 -}
-
 
 {-
 ↠⋆/↣-step : ∀ {α R h l e h′ c′ h″ c″} →
@@ -278,4 +314,20 @@ bar cons cons′ e↣e′ = {!!}
   [] (yes ∅-Consistent) α≢τ R↠⋆e′ c′↠c″
 ↠⋆/↣-step {l = l} R↣⋆e cons? α≢τ (↠-↣ (↣-mutate h′) ∷ e↠⋆e′) c′↠c″ = ↠⋆/↣-step
   R↣⋆e (Consistent? h′ l) α≢τ e↠⋆e′ c′↠c″
+-}
+
+{-
+step : ∀ {R h l e h′ c′ h″ c″} →
+  h′  ⊢  ∅ , R  ↣⋆  l , e →
+  Dec (Consistent h l) →
+  h , ↣⟨ ● (R , l) , atomic e ⟩  ↠⋆  h′ , c′ →
+  ☢ ⊢  h′ , c′  ↠  h″ , c″ →
+  ∃₂ λ l′ m →
+  c′ ≡ ↣⟨ ● (R , l′) , atomic (# m) ⟩ ×
+  h′ ⊢  ∅ , R  ↣⋆  l′ , # m
+step R↣⋆e cons? [] (↠-↣ (↣-commit cons)) = _ , _ , ≡.refl , R↣⋆e
+step R↣⋆e cons? (↠-↣ (↣-step e↣e′) ∷ e′↠⋆e″) c″↠c‴ = step
+  (R↣⋆e ◅◅ {!e↣e′!} ∷ []) (Dec.map (↣-Consistent e↣e′) cons?) e′↠⋆e″ c″↠c‴
+step R↣⋆e cons? (↠-↣ (↣-mutate h′) ∷ e′↠⋆e″) c″↠c‴ = {!!}
+step R↣⋆e cons? (↠-↣ (↣-abort ¬cons) ∷ e′↠⋆e″) c″↠c‴ = {!!}
 -}
