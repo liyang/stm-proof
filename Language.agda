@@ -83,6 +83,27 @@ data _⊢_↣′_ (h : Heap) : Rel (Logs × Expression′) where
   ↣-writeℕ : ∀ {l v m} →
     h ⊢  l , write v (# m)  ↣′  Write l v m , # m
 
+-- ↣′ preserves consistency
+↣′-Consistent : ∀ {h l e l′ e′} →
+  h ⊢  l , e  ↣′  l′ , e′ →
+  Consistent h l ⇔ Consistent h l′
+↣′-Consistent ↣-ℕ = Equivalence.id
+↣′-Consistent (↣-R m b↣b′) = ↣′-Consistent b↣b′
+↣′-Consistent (↣-L b a↣a′) = ↣′-Consistent a↣a′
+↣′-Consistent (↣-read l v) = Read-Consistent′ l v
+↣′-Consistent (↣-writeE e↣e′) = ↣′-Consistent e↣e′
+↣′-Consistent ↣-writeℕ = Equivalence.id
+
+infix 3 _⊢_↣⋆_
+_⊢_↣⋆_ : Heap → Rel (Logs × Expression′)
+h ⊢ l , e ↣⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
+
+↣′⋆-Consistent : ∀ {h l l′ e e′} →
+  h  ⊢ l , e ↣⋆ l′ , e′ →
+  Consistent h l ⇔ Consistent h l′
+↣′⋆-Consistent [] = Equivalence.id
+↣′⋆-Consistent (e↣e′ ∷ e′↣⋆e″) = ↣′⋆-Consistent e′↣⋆e″ ⟨∘⟩ ↣′-Consistent e↣e′
+
 infix 3 _⊢_↣_
 data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
   ↣-begin : ∀ {h e} →
@@ -96,10 +117,6 @@ data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
     τ ⊢  h , ● (R , l) , atomic (# m)  ↣  h , ● (R , ∅) , atomic R
   ↣-commit : ∀ {h R l m} → (cons : Consistent h l) →
     ☢ ⊢  h , ● (R , l) , atomic (# m)  ↣  Update h l , ○ , # m
-
-infix 3 _⊢_↣⋆_
-_⊢_↣⋆_ : Heap → Rel (Logs × Expression′)
-h ⊢ l , e ↣⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
 
 infix 3 _⊢_↠_
 data _⊢_↠_ (α : Action) : Rel (Heap × Combined) where

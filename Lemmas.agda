@@ -171,22 +171,6 @@ s ⤇̸ = ∀ {α h h′s′} → α ⊢ h , s ⤇ h′s′ → ⊥
 ...   | h″ , cons″ , equiv″ , e′↦⋆e″ = h″ , cons″ , equiv″ , e↦e′ ∷ e′↦⋆e″
 -}
 
-↣-Consistent : ∀ {h l e l′ e′} →
-  h ⊢  l , e  ↣′  l′ , e′ →
-  Consistent h l ⇔ Consistent h l′
-↣-Consistent ↣-ℕ = Equivalence.id
-↣-Consistent (↣-R m b↣b′) = ↣-Consistent b↣b′
-↣-Consistent (↣-L b a↣a′) = ↣-Consistent a↣a′
-↣-Consistent (↣-read l v) = Read-Consistent′ l v
-↣-Consistent (↣-writeE e↣e′) = ↣-Consistent e↣e′
-↣-Consistent ↣-writeℕ = Equivalence.id
-
-↣⋆-Consistent : ∀ {h l l′ e e′} →
-  h  ⊢ l , e ↣⋆ l′ , e′ →
-  Consistent h l ⇔ Consistent h l′
-↣⋆-Consistent [] = Equivalence.id
-↣⋆-Consistent (e↣e′ ∷ e′↣⋆e″) = ↣⋆-Consistent e′↣⋆e″ ⟨∘⟩ ↣-Consistent e↣e′
-
 {-
 ↣⋆-Consistent : ∀ {h l l′ e e′} →
   h  ⊢ l , e ↣⋆ l′ , e′ →
@@ -259,7 +243,7 @@ postulate
 ↠⋆/↣-step {h = h} {l = l} R↣⋆e (↠-↣ (↣-mutate h′) ∷ c′↠⋆c″) c″↠c‴ with Consistent? h′ l
 ... | yes cons′ = ↠⋆/↣-step (swap-heap cons cons′ R↣⋆e) c′↠⋆c″ c″↠c‴ where
   cons : Consistent h l
-  cons = Equivalence.to (↣⋆-Consistent R↣⋆e) ⟨$⟩ ∅-Consistent
+  cons = Equivalence.to (↣′⋆-Consistent R↣⋆e) ⟨$⟩ ∅-Consistent
 ... | no ¬cons′ = {!!}
 
 {-
