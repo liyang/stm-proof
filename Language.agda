@@ -35,74 +35,75 @@ data Action : Set where
 
 infix 3 _↦′_
 data _↦′_ : Rel (Heap × Expression′) where
-  ↦-ℕ : ∀ {h m n} →
+  ↦′-ℕ : ∀ {h m n} →
     h , # m ⊕ # n  ↦′  h , # (m + n)
-  ↦-R : ∀ {h h′ b b′} m →
+  ↦′-R : ∀ {h h′ b b′} m →
     (b↦b′ : h ,       b  ↦′  h′ ,       b′)  →
             h , # m ⊕ b  ↦′  h′ , # m ⊕ b′
-  ↦-L : ∀ {h h′ a a′} b →
+  ↦′-L : ∀ {h h′ a a′} b →
     (a↦a′ : h , a      ↦′  h′ , a′)  →
             h , a ⊕ b  ↦′  h′ , a′ ⊕ b
 
-  ↦-read : ∀ {h} v →
+  ↦′-read : ∀ {h} v →
     h , read v  ↦′  h , # Vec.lookup v h
-  ↦-writeE : ∀ {h e h′ e′ v} →
+  ↦′-writeE : ∀ {h e h′ e′ v} →
     (e↦e′ : h ,         e  ↦′  h′ ,         e′)  →
             h , write v e  ↦′  h′ , write v e′
-  ↦-writeℕ : ∀ {h v m} →
+  ↦′-writeℕ : ∀ {h v m} →
     h , write v (# m)  ↦′  h [ v ]≔ m , # m
 
-infix 3 _↦⋆_
-_↦⋆_ : Rel (Heap × Expression′)
-_↦⋆_ = Star _↦′_
+infix 3 _↦′⋆_
+_↦′⋆_ : Rel (Heap × Expression′)
+_↦′⋆_ = Star _↦′_
 
 infix 3 _⊢_↦_
 data _⊢_↦_ : Action → Rel (Heap × Expression) where
   ↦-mutate : ∀ h′ {h e} →
     τ ⊢ h , e  ↦  h′ , e
   ↦-atomic : ∀ {h e h′ m} →
-    (e↦⋆# : h ,        e  ↦⋆  h′ , # m)  →
-       ☢ ⊢  h , atomic e  ↦   h′ , # m
+    (e↦⋆# : h ,        e  ↦′⋆  h′ , # m)  →
+       ☢ ⊢  h , atomic e  ↦    h′ , # m
 
 infix 3 _⊢_↣′_
 data _⊢_↣′_ (h : Heap) : Rel (Logs × Expression′) where
-  ↣-ℕ : ∀ {l m n} →
+  ↣′-ℕ : ∀ {l m n} →
     h ⊢  l , # m ⊕ # n  ↣′  l , # (m + n)
-  ↣-R : ∀ {l b l′ b′} m →
+  ↣′-R : ∀ {l b l′ b′} m →
     (b↣b′ : h ⊢  l ,       b  ↣′  l′ ,       b′)  →
             h ⊢  l , # m ⊕ b  ↣′  l′ , # m ⊕ b′
-  ↣-L : ∀ {l a l′ a′} b →
+  ↣′-L : ∀ {l a l′ a′} b →
     (a↣a′ : h ⊢  l , a      ↣′  l′ , a′)  →
             h ⊢  l , a ⊕ b  ↣′  l′ , a′ ⊕ b
 
-  ↣-read : ∀ l v → let l′m = Read h l v in
+  ↣′-read : ∀ l v → let l′m = Read h l v in
     h ⊢  l , read v  ↣′  fst l′m , # snd l′m
-  ↣-writeE : ∀ {l e l′ e′ v} →
+  ↣′-writeE : ∀ {l e l′ e′ v} →
     (e↣e′ : h ⊢  l ,         e  ↣′  l′ ,         e′)  →
             h ⊢  l , write v e  ↣′  l′ , write v e′
-  ↣-writeℕ : ∀ {l v m} →
+  ↣′-writeℕ : ∀ {l v m} →
     h ⊢  l , write v (# m)  ↣′  Write l v m , # m
 
 -- ↣′ preserves consistency
 ↣′-Consistent : ∀ {h l e l′ e′} →
   h ⊢  l , e  ↣′  l′ , e′ →
   Consistent h l ⇔ Consistent h l′
-↣′-Consistent ↣-ℕ = Equivalence.id
-↣′-Consistent (↣-R m b↣b′) = ↣′-Consistent b↣b′
-↣′-Consistent (↣-L b a↣a′) = ↣′-Consistent a↣a′
-↣′-Consistent (↣-read l v) = Read-Consistent′ l v
-↣′-Consistent (↣-writeE e↣e′) = ↣′-Consistent e↣e′
-↣′-Consistent ↣-writeℕ = Equivalence.id
+↣′-Consistent ↣′-ℕ = Equivalence.id
+↣′-Consistent (↣′-R m b↣b′) = ↣′-Consistent b↣b′
+↣′-Consistent (↣′-L b a↣a′) = ↣′-Consistent a↣a′
+↣′-Consistent (↣′-read l v) = Read-Consistent′ l v
+↣′-Consistent (↣′-writeE e↣e′) = ↣′-Consistent e↣e′
+↣′-Consistent ↣′-writeℕ = Equivalence.id
 
-infix 3 _⊢_↣⋆_
-_⊢_↣⋆_ : Heap → Rel (Logs × Expression′)
-h ⊢ l , e ↣⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
+-- sequence of ↣′ transitions with the same heap
+infix 3 _⊢_↣′⋆_
+_⊢_↣′⋆_ : Heap → Rel (Logs × Expression′)
+h ⊢ l , e ↣′⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
 
 ↣′⋆-Consistent : ∀ {h l l′ e e′} →
-  h  ⊢ l , e ↣⋆ l′ , e′ →
+  h  ⊢ l , e ↣′⋆ l′ , e′ →
   Consistent h l ⇔ Consistent h l′
 ↣′⋆-Consistent [] = Equivalence.id
-↣′⋆-Consistent (e↣e′ ∷ e′↣⋆e″) = ↣′⋆-Consistent e′↣⋆e″ ⟨∘⟩ ↣′-Consistent e↣e′
+↣′⋆-Consistent (e↣′e′ ∷ e′↣′⋆e″) = ↣′⋆-Consistent e′↣′⋆e″ ⟨∘⟩ ↣′-Consistent e↣′e′
 
 infix 3 _⊢_↣_
 data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
