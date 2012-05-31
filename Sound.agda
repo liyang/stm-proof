@@ -37,17 +37,40 @@ H↣′⋆-Consistent : ∀ {h′ l′ e′ l e} →
 H↣′⋆-Consistent {h′} {l′} {e′} = flip $
   ⋆.gfold fst (const ∘ Consistent h′) H↣′-Consistent {k = l′ , e′}
 
-extract : ∀ {h R l e h′ c′ h″ c″} →
-  H⊢ ∅ , R ↣′⋆ l , e →
-  h , ↣⟨ ● (R , l) , atomic e ⟩  ↠⋆  h′ , c′ →
-  ☢ ⊢  h′ , c′  ↠  h″ , c″ →
+private
+  extract : ∀ {α h R l e h′ c′ h″ c″} →
+    H⊢ ∅ , R ↣′⋆ l , e →
+    α ≢ τ →
+    h , ↣⟨ ● (R , l) , atomic e ⟩  ↠⋆  h′ , c′ →
+    α ⊢  h′ , c′  ↠  h″ , c″ →
+    ∃₂ λ l′ m →
+    α ≡ ☢ ×
+    c′ ≡ ↣⟨ ● (R , l′) , atomic (# m) ⟩ ×
+    h″ , c″ ≡ Update h′ l′ , ↣⟨ ○ , # m ⟩ ×
+    Consistent h′ l′ ×
+    H⊢ ∅ , R ↣′⋆ l′ , # m
+  extract R↣′⋆e α≢τ [] (↠-↣ (↣-step e↣e′)) = ⊥-elim (α≢τ ≡.refl)
+  extract R↣′⋆e α≢τ [] (↠-↣ (↣-mutate h′)) = ⊥-elim (α≢τ ≡.refl)
+  extract R↣′⋆e α≢τ [] (↠-↣ (↣-abort ¬cons)) = ⊥-elim (α≢τ ≡.refl)
+  extract R↣′⋆e α≢τ [] (↠-↣ (↣-commit cons)) = _ , _ , ≡.refl , ≡.refl , ≡.refl , cons , R↣′⋆e
+  extract R↣′⋆e α≢τ (↠-↣ (↣-step e↣e′)   ∷ c′↠⋆c″) c″↠c‴ = extract (R↣′⋆e ◅◅ (_ , e↣e′) ∷ []) α≢τ c′↠⋆c″ c″↠c‴
+  extract R↣′⋆e α≢τ (↠-↣ (↣-mutate h′)   ∷ c′↠⋆c″) c″↠c‴ = extract R↣′⋆e α≢τ c′↠⋆c″ c″↠c‴
+  extract R↣′⋆e α≢τ (↠-↣ (↣-abort ¬cons) ∷ c′↠⋆c″) c″↠c‴ = extract [] α≢τ c′↠⋆c″ c″↠c‴
+
+↣-extract : ∀ {α h R h′ c′ h″ c″} →
+  α ≢ τ →
+  h , ↣⟨ ○ , atomic R ⟩ ↠⋆ h′ , c′ →
+  α ⊢ h′ , c′ ↠ h″ , c″ →
   ∃₂ λ l′ m →
+  α ≡ ☢ ×
   c′ ≡ ↣⟨ ● (R , l′) , atomic (# m) ⟩ ×
+  h″ , c″ ≡ Update h′ l′ , ↣⟨ ○ , # m ⟩ ×
+  Consistent h′ l′ ×
   H⊢ ∅ , R ↣′⋆ l′ , # m
-extract R↣′⋆e [] (↠-↣ (↣-commit cons)) = _ , _ , ≡.refl , R↣′⋆e
-extract R↣′⋆e (↠-↣ (↣-step e↣e′) ∷ c′↠⋆c″) c″↠c‴ = extract (R↣′⋆e ◅◅ (_ , e↣e′) ∷ []) c′↠⋆c″ c″↠c‴
-extract R↣′⋆e (↠-↣ (↣-mutate h′) ∷ c′↠⋆c″) c″↠c‴ = extract R↣′⋆e c′↠⋆c″ c″↠c‴
-extract R↣′⋆e (↠-↣ (↣-abort ¬cons) ∷ c′↠⋆c″) c″↠c‴ = extract [] c′↠⋆c″ c″↠c‴
+↣-extract α≢τ [] (↠-↣ ↣-begin) = ⊥-elim (α≢τ ≡.refl)
+↣-extract α≢τ [] (↠-↣ (↣-mutate h′)) = ⊥-elim (α≢τ ≡.refl)
+↣-extract α≢τ (↠-↣ ↣-begin ∷ c↠⋆c′) c′↠c″ = extract [] α≢τ c↠⋆c′ c′↠c″
+↣-extract α≢τ (↠-↣ (↣-mutate h′) ∷ c↠⋆c′) c′↠c″ = ↣-extract α≢τ c↠⋆c′ c′↠c″
 
 ↣′-swap : ∀ {h h′ l e l′ e′} →
   Consistent h′ l′ →
