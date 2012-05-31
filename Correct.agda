@@ -33,9 +33,9 @@ correct h (# m) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
 
 correct h (atomic e) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
   ↦≼↣ : h , ↦⟨ atomic e ⟩ ≼ h , ↣⟨ ○ , atomic e ⟩
-  ↦≼↣ {x′ = h′ , c′} e⤇e′ with ↦-extract e⤇e′
-  ... | h₀ , m , ≡.refl , c′≡m , h≟h₀ , e↦′⋆m rewrite c′≡m with ↦′⋆→↣′⋆ ∅-Consistent ∅-Equivalent e↦′⋆m
-  ...   | l′ , cons′ , equiv′ , e↣′⋆m rewrite Commit-Update cons′ equiv′ = _ , e⤇m , correct _ _ where
+  ↦≼↣ {x′ = h″ , c″} e⤇e′ with ↦-extract e⤇e′
+  ... | h₀ , m , ≡.refl , c″≡m , h≟h₀ , e↦′⋆m rewrite c″≡m with ↦′⋆→↣′⋆ ∅-Consistent ∅-Equivalent e↦′⋆m
+  ...   | l′ , cons′ , equiv′ , e↣′⋆m rewrite Commit-Update cons′ equiv′ ∶ h″ ≡ Update h₀ l′ = _ , e⤇m , correct _ _ where
 
     mutate? : ∀ {c′} → Dec (h ≡ h₀) →
       h₀ , ↣⟨ ○ , atomic e ⟩ ↠⋆ h₀ , c′ →
@@ -50,12 +50,16 @@ correct h (atomic e) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
     e⤇m = ⤇: (λ ()) (mutate? h≟h₀ e↣⋆m) (↠-↣ (↣-commit cons′))
 
   ↣≼↦ : h , ↣⟨ ○ , atomic e ⟩ ≼ h , ↦⟨ atomic e ⟩
-  ↣≼↦ (⤇: α≢τ c↠⋆c′ c′↠c″) with ↣-extract α≢τ c↠⋆c′ c′↠c″
+  ↣≼↦ (⤇: {h′} α≢τ c↠⋆c′ c′↠c″) with ↣-extract α≢τ c↠⋆c′ c′↠c″
   ... | l′ , m , ≡.refl , ≡.refl , ≡.refl , cons , e↣⋆m with ↣′⋆→↦′⋆ ∅-Consistent ∅-Equivalent (↣′⋆-swap cons e↣⋆m)
-  ...   | h′ , _ , equiv , e↦′⋆m rewrite Commit-Update cons equiv = (_ , _) , ⤇: (λ ()) (mutate? (h ≟Heap _)) (↠-↦ (↦-atomic e↦′⋆m)) , ≈→≽ m≈m ∧ ≈→≼ m≈m where
+  ...   | h″ , _ , equiv , e↦′⋆m rewrite Commit-Update cons equiv ∶ h″ ≡ Update h′ l′ = (_ , _) , e⤇m , ↣≈↦ where
     -- Termination checker can't see through ≈-sym, so we inline it.
-    m≈m = correct _ _
+    ↦≈↣ = correct _ _
+    ↣≈↦ = ≈→≽ ↦≈↣ ∧ ≈→≼ ↦≈↣
 
     mutate? : ∀ {h₀} → Dec (h ≡ h₀) → h , ↦⟨ atomic e ⟩ ↠⋆ h₀ , ↦⟨ atomic e ⟩
     mutate? (yes ≡.refl) = []
     mutate? (no h≢h₀) = ↠-↦ (↦-mutate _) ∷ []
+
+    e⤇m : ☢ ⊢ h , ↦⟨ atomic e ⟩ ⤇ Update h′ l′ , ↦⟨ # m ⟩
+    e⤇m = ⤇: (λ ()) (mutate? (h ≟Heap _)) (↠-↦ (↦-atomic e↦′⋆m))
