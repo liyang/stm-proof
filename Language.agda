@@ -99,11 +99,11 @@ infix 3 _⊢_↣′⋆_
 _⊢_↣′⋆_ : Heap → Rel (Logs × Expression′)
 h ⊢ l , e ↣′⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
 
-↣′⋆-Consistent : ∀ {h l l′ e e′} →
+↣′⋆-Consistent : ∀ {h l′ e′ l e} →
   h  ⊢ l , e ↣′⋆ l′ , e′ →
   Consistent h l ⇔ Consistent h l′
-↣′⋆-Consistent [] = Equivalence.id
-↣′⋆-Consistent (e↣′e′ ∷ e′↣′⋆e″) = ↣′⋆-Consistent e′↣′⋆e″ ⟨∘⟩ ↣′-Consistent e↣′e′
+↣′⋆-Consistent {h} {l′} {e′} = ⋆.gfold (Consistent h ∘ fst) _⇔_
+  (λ e↣′e′ l⇔l′ → l⇔l′ ⟨∘⟩ ↣′-Consistent e↣′e′) {k = l′ , e′} Equivalence.id
 
 infix 3 _⊢_↣_
 data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
