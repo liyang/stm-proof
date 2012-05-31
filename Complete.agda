@@ -5,7 +5,19 @@ open import Language
 
 -- Equivalence of _↦′_ and _↣′_
 
--- The easy direction
+-- Zero or more ↦-mutate rules followed by ↦-atomic.
+↦-extract : ∀ {α h₀ e h″ c″} →
+  α ⊢ h₀ , ↦⟨ atomic e ⟩ ⤇ h″ , c″ →
+  ∃₂ λ h m →
+  α ≡ ☢ ×
+  c″ ≡ ↦⟨ # m ⟩ ×
+  Dec (h₀ ≡ h) ×
+  h , e ↦′⋆ h″ , # m
+↦-extract (⤇: α≢τ [] (↠-↦ (↦-mutate h₁))) = ⊥-elim (α≢τ ≡.refl)
+↦-extract (⤇: α≢τ [] (↠-↦ (↦-atomic e↦⋆m))) = _ , _ , ≡.refl , ≡.refl , yes ≡.refl , e↦⋆m
+↦-extract (⤇: α≢τ (↠-↦ (↦-mutate h₁) ∷ c↠⋆c′) c′↠c″) with ↦-extract (⤇: α≢τ c↠⋆c′ c′↠c″)
+... | h , m , ≡.refl , ≡.refl , eq? , e↦⋆m = _ , _ , ≡.refl , ≡.refl , (_ ≟Heap h) , e↦⋆m
+
 ↦′→↣′ : ∀ {h₀ l h e h′ e′} →
   Consistent h₀ l →
   Equivalent h₀ l h →
