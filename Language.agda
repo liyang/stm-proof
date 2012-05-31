@@ -16,7 +16,7 @@ data Expression′ : Set where
 
 data Expression : Set where
   #_ : (m : ℕ) → Expression
---   _⊕_ : (a b : Expression) → Expression
+  _⊕_ : (a b : Expression) → Expression
   atomic : (e : Expression′) → Expression
 
 
@@ -58,6 +58,15 @@ _↦′⋆_ = Star _↦′_
 
 infix 3 _⊢_↦_
 data _⊢_↦_ : Action → Rel (Heap × Expression) where
+  ↦-ℕ : ∀ {h m n} →
+    τ ⊢ h , # m ⊕ # n  ↦  h , # (m + n)
+  ↦-R : ∀ {α h h′ b b′} m →
+    (b↦b′ : α ⊢  h ,       b  ↦  h′ ,       b′)  →
+            α ⊢  h , # m ⊕ b  ↦  h′ , # m ⊕ b′
+  ↦-L : ∀ {α h h′ a a′} b →
+    (a↦a′ : α ⊢  h , a      ↦  h′ , a′)  →
+            α ⊢  h , a ⊕ b  ↦  h′ , a′ ⊕ b
+
   ↦-mutate : ∀ h′ {h e} →
     τ ⊢ h , e  ↦  h′ , e
   ↦-atomic : ∀ {h e h′ m} →
@@ -107,6 +116,15 @@ h ⊢ l , e ↣′⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
 
 infix 3 _⊢_↣_
 data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
+  ↣-ℕ : ∀ {h t m n} →
+    τ ⊢  h , t , # m ⊕ # n  ↣  h , t , # (m + n)
+  ↣-R : ∀ {α h t b h′ t′ b′} m →
+    (b↣b′ : α ⊢  h , t ,       b  ↣  h′ , t′ ,       b′)  →
+            α ⊢  h , t , # m ⊕ b  ↣  h′ , t′ , # m ⊕ b′
+  ↣-L : ∀ {α h t a h′ t′ a′} b →
+    (a↣a′ : α ⊢  h , t , a      ↣  h′ , t′ , a′)  →
+            α ⊢  h , t , a ⊕ b  ↣  h′ , t′ , a′ ⊕ b
+
   ↣-begin : ∀ {h e} →
     τ ⊢  h , ○ , atomic e  ↣  h , ● (e , ∅) , atomic e
   ↣-step : ∀ {h R l e l′ e′} →

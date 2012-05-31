@@ -31,6 +31,13 @@ correct h (# m) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
   ↣≼↦ : h , ↣⟨ ○ , # m ⟩ ≼ h , ↦⟨ # m ⟩
   ↣≼↦ (⤇: α≢τ c↠⋆c′ c′↠c″) = ⊥-elim (#↣̸ α≢τ c↠⋆c′ c′↠c″)
 
+correct h (a ⊕ b) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
+  ↦≼↣ : h , ↦⟨ a ⊕ b ⟩ ≼ h , ↣⟨ ○ , a ⊕ b ⟩
+  ↦≼↣ e⤇e′ = {!!}
+
+  ↣≼↦ : h , ↣⟨ ○ , a ⊕ b ⟩ ≼ h , ↦⟨ a ⊕ b ⟩
+  ↣≼↦ e⤇e′ = {!!}
+
 correct h (atomic e) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
   ↦≼↣ : h , ↦⟨ atomic e ⟩ ≼ h , ↣⟨ ○ , atomic e ⟩
   ↦≼↣ {x′ = h″ , c″} e⤇e′ with ↦-extract e⤇e′
