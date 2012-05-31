@@ -19,6 +19,10 @@ record Logs : Set where
 Heap : Set
 Heap = Vec ℕ ∣Heap∣
 
+infix 4 _≟Heap_
+_≟Heap_ : ∀ (h h′ : Heap) → Dec (h ≡ h′)
+h ≟Heap h′ = Dec.map Vec.Pointwise-≡ (Vec.Pointwise.decidable _≟ℕ_ h h′)
+
 infix 8 _[_]≔_
 _[_]≔_ : {α : Set} {N : ℕ} → Vec α N → Fin N → α → Vec α N
 _[_]≔_ = Vec._[_]≔_
