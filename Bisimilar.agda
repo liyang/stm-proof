@@ -2,9 +2,10 @@ open import Common
 
 module Bisimilar {A E : Set} (transition : A → Rel E) where
 
-infix 3 _⊢_⤇_
-_⊢_⤇_ : A → Rel E
-_⊢_⤇_ = transition
+private
+  infix 3 _⊢_⤇_
+  _⊢_⤇_ : A → Rel E
+  _⊢_⤇_ = transition
 
 mutual
   infix 4 _≼_ _≽_ _≈_
