@@ -12,16 +12,16 @@ open Bisimilar _⊢_⤇_
   h , ↦⟨ # m ⟩ ↠⋆ x′ →
   α ⊢ x′ ↠ x″ →
   ⊥
-#↦̸ α≢τ [] (↠-↦ (↦-mutate h′)) = α≢τ ≡.refl
-#↦̸ α≢τ (↠-↦ (↦-mutate h′) ∷ x↠⋆x′) x′↠x″ = #↦̸ α≢τ x↠⋆x′ x′↠x″
+#↦̸ α≢τ [] (↠-↦ ())
+#↦̸ α≢τ (↠-↦ () ∷ _) _
 
 #↣̸ : ∀ {α h m x′ x″} →
   α ≢ τ →
   h , ↣⟨ ○ , # m ⟩ ↠⋆ x′ →
   α ⊢ x′ ↠ x″ →
   ⊥
-#↣̸ α≢τ [] (↠-↣ (↣-mutate h′)) = α≢τ ≡.refl
-#↣̸ α≢τ (↠-↣ (↣-mutate h′) ∷ x↠⋆x′) x′↠x″ = #↣̸ α≢τ x↠⋆x′ x′↠x″
+#↣̸ α≢τ [] (↠-↣ ())
+#↣̸ α≢τ (↠-↣ () ∷ _) _
 
 correct : ∀ h e → h , ↦⟨ e ⟩ ≈ h , ↣⟨ ○ , e ⟩
 correct h (# m) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
@@ -45,16 +45,16 @@ correct h (atomic e) = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
   ...   | l′ , cons′ , equiv′ , e↣′⋆m rewrite Commit-Update cons′ equiv′ ∶ h″ ≡ Update h₀ l′ = _ , e⤇m , correct _ _ where
 
     mutate? : ∀ {c′} → Dec (h ≡ h₀) →
-      h₀ , ↣⟨ ○ , atomic e ⟩ ↠⋆ h₀ , c′ →
-      h  , ↣⟨ ○ , atomic e ⟩ ↠⋆ h₀ , c′
+      h₀ , ↣⟨ ● (e , ∅) , atomic e ⟩ ↠⋆ h₀ , c′ →
+      h  , ↣⟨ ● (e , ∅) , atomic e ⟩ ↠⋆ h₀ , c′
     mutate? (yes h≡h₀) rewrite h≡h₀ = id
     mutate? (no  h≢h₀) = _∷_ (↠-↣ (↣-mutate _))
 
-    e↣⋆m : h₀ , ↣⟨ ○ , atomic e ⟩ ↠⋆ h₀ , ↣⟨ ● (e , l′) , atomic (# m) ⟩
-    e↣⋆m = ↠-↣ ↣-begin ∷ ⋆.gmap _ (↠-↣ ∘ ↣-step) e↣′⋆m
+    e↣⋆m : h₀ , ↣⟨ ● (e , ∅) , atomic e ⟩ ↠⋆ h₀ , ↣⟨ ● (e , l′) , atomic (# m) ⟩
+    e↣⋆m = ⋆.gmap _ (↠-↣ ∘ ↣-step) e↣′⋆m
 
     e⤇m : ☢ ⊢ h , ↣⟨ ○ , atomic e ⟩ ⤇ Update h₀ l′ , ↣⟨ ○ , # m ⟩
-    e⤇m = ⤇: (λ ()) (mutate? h≟h₀ e↣⋆m) (↠-↣ (↣-commit cons′))
+    e⤇m = ⤇: (λ ()) (↠-↣ ↣-begin ∷ mutate? h≟h₀ e↣⋆m) (↠-↣ (↣-commit cons′))
 
   ↣≼↦ : h , ↣⟨ ○ , atomic e ⟩ ≼ h , ↦⟨ atomic e ⟩
   ↣≼↦ (⤇: {h′} α≢τ c↠⋆c′ c′↠c″) with ↣-extract α≢τ c↠⋆c′ c′↠c″

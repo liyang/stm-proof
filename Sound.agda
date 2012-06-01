@@ -68,9 +68,7 @@ private
   Consistent h′ l′ ×
   H⊢ ∅ , R ↣′⋆ l′ , # m
 ↣-extract α≢τ [] (↠-↣ ↣-begin) = ⊥-elim (α≢τ ≡.refl)
-↣-extract α≢τ [] (↠-↣ (↣-mutate h′)) = ⊥-elim (α≢τ ≡.refl)
 ↣-extract α≢τ (↠-↣ ↣-begin ∷ c↠⋆c′) c′↠c″ = extract [] α≢τ c↠⋆c′ c′↠c″
-↣-extract α≢τ (↠-↣ (↣-mutate h′) ∷ c↠⋆c′) c′↠c″ = ↣-extract α≢τ c↠⋆c′ c′↠c″
 
 ↣′-swap : ∀ {h h′ l e l′ e′} →
   Consistent h′ l′ →

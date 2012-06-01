@@ -68,7 +68,7 @@ data _⊢_↦_ : Action → Rel (Heap × Expression) where
             α ⊢  h , a ⊕ b  ↦  h′ , a′ ⊕ b
 
   ↦-mutate : ∀ h′ {h e} →
-    τ ⊢ h , e  ↦  h′ , e
+    τ ⊢ h , atomic e  ↦  h′ , atomic e
   ↦-atomic : ∀ {h e h′ m} →
     (e↦⋆# : h ,        e  ↦′⋆  h′ , # m)  →
        ☢ ⊢  h , atomic e  ↦    h′ , # m
@@ -131,7 +131,7 @@ data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
     (e↣e′ : h ⊢  l , e  ↣′  l′ , e′)  →
     τ ⊢ h , ● (R , l) , atomic e  ↣  h , ● (R , l′) , atomic e′
   ↣-mutate : ∀ h′ {h t e} →
-    τ ⊢ h , t , e  ↣  h′ , t , e
+    τ ⊢ h , ● t , atomic e  ↣  h′ , ● t , atomic e
   ↣-abort : ∀ {h R l m} → (¬cons : ¬ Consistent h l) →
     τ ⊢  h , ● (R , l) , atomic (# m)  ↣  h , ● (R , ∅) , atomic R
   ↣-commit : ∀ {h R l m} → (cons : Consistent h l) →
