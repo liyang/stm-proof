@@ -1,56 +1,41 @@
+module Bisimilar where
+
 open import Common
-
-module Bisimilar {A E : Set} (transition : A → Rel E) where
-
-private
-  infix 3 _⊢_⤇_
-  _⊢_⤇_ : A → Rel E
-  _⊢_⤇_ = transition
+open import Language
 
 mutual
-  infix 4 _≼_ _≽_ _≈_
-  _≼_ : Rel E
-  x ≼ y = ∀ {α x′} (x⤇x′ : α ⊢ x ⤇ x′) → ∃ λ y′ → α ⊢ y ⤇ y′ × x′ ≈ y′
-  _≽_ : Rel E
-  _≽_ = flip _≼_
+  infix 4 _⊢_≼_ _⊢_≽_ _⊢_≈_
+  _⊢_≼_ : Heap × Expression → Rel Combined
+  h , e ⊢ x ≼ y = ∀ {h′ x′ e′ α} (x⤇x′ : α ⊢ h , x , e ⤇ h′ , x′ , e′) → ∃ λ y′ → α ⊢ h , y , e ⤇ h′ , y′ , e′ × (h′ , e′ ⊢ x′ ≈ y′)
+  _⊢_≽_ : Heap × Expression → Rel Combined
+  _⊢_≽_ he = flip (_⊢_≼_ he)
 
-  record _≈_ (x y : E) : Set where
+  record _⊢_≈_ (he : Heap × Expression) (x y : Combined) : Set where
     constructor _∧_
     field
-      ≈→≼ : ∞ (x ≼ y)
-      ≈→≽ : ∞ (x ≽ y)
+      ≈→≼ : ∞ (he ⊢ x ≼ y)
+      ≈→≽ : ∞ (he ⊢ x ≽ y)
 
-open _≈_ public
+open _⊢_≈_ public
 
 mutual
-  ≼-refl : Reflexive _≼_
+  ≼-refl : {he : Heap × Expression} → Reflexive (_⊢_≼_ he)
   ≼-refl x⤇x′ = _ , x⤇x′ , ≈-refl
 
-  ≈-refl : Reflexive _≈_
+  ≈-refl : {he : Heap × Expression} → Reflexive (_⊢_≈_ he)
   ≈-refl = ♯ ≼-refl ∧ ♯ ≼-refl
 
-≈-sym : Symmetric _≈_
+-- A bit useless as the termination checker can't see through it (although
+-- record projections are okay), so we end up inlining ≈-sym in such cases.
+≈-sym : {he : Heap × Expression} → Symmetric (_⊢_≈_ he)
 ≈-sym (x≼y ∧ x≽y) = x≽y ∧ x≼y
 
 mutual
-  ≼-trans : Transitive _≼_
+  ≼-trans : {he : Heap × Expression} → Transitive (_⊢_≼_ he)
   ≼-trans x≼y y≼z x⤇x′ with x≼y x⤇x′
   ... | y′ , y⤇y′ , x′≈y′ with y≼z y⤇y′
   ...   | z′ , z⤇z′ , y′≈z′ = z′ , z⤇z′ , ≈-trans x′≈y′ y′≈z′
 
-  ≈-trans : Transitive _≈_
+  ≈-trans : {he : Heap × Expression} → Transitive (_⊢_≈_ he)
   ≈-trans (x≼y ∧ x≽y) (y≼z ∧ y≽z) = ♯ ≼-trans (♭ x≼y) (♭ y≼z) ∧ ♯ ≼-trans (♭ y≽z) (♭ x≽y)
 
-≈-setoid : Setoid
-≈-setoid = record
-  { Carrier = E
-  ; _≈_ = _≈_
-  ; isEquivalence = record
-    { refl = ≈-refl
-    ; sym = ≈-sym
-    ; trans = ≈-trans
-    }
-  }
-
-import Relation.Binary.EqReasoning as EqR
-module ≈-Reasoning = EqR ≈-setoid
