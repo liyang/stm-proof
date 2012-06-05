@@ -8,7 +8,7 @@ open import Sound
 open import Bisimilar
 
 #⊢↦≈↣ : ∀ {h m} → h , # m ⊢ ↦: ≈ ↣: ○
-#⊢↦≈↣ = ♯ (⊥-elim ∘ ↦⟨#⟩⤇̸) ∧ ♯ (⊥-elim ∘ ↣⟨#⟩⤇̸)
+#⊢↦≈↣ = ♯ (⊥-elim ∘ #⤇̸) ∧ ♯ (⊥-elim ∘ #⤇̸)
 
 m⊕n⊢↦≈↣ : ∀ {h m n} → h , # m ⊕ # n ⊢ ↦: ≈ ↣: ○
 m⊕n⊢↦≈↣ {h} {m} {n} = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
