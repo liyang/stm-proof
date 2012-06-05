@@ -38,15 +38,15 @@ H↣′⋆-Consistent {h′} {l′} {e′} = flip $
   ⋆.gfold fst (const ∘ Consistent h′) H↣′-Consistent {k = l′ , e′}
 
 private
-  extract : ∀ {α h R l e h′ c′ h″ c″} →
+  extract : ∀ {α h R l e h′ c′ e′ h″ c″ e″} →
     H⊢ ∅ , R ↣′⋆ l , e →
     α ≢ τ →
-    h , ↣⟨ ● (R , l) , atomic e ⟩  ↠⋆  h′ , c′ →
-    α ⊢  h′ , c′  ↠  h″ , c″ →
+    h , ↣: ● (R , l) , atomic e  ↠⋆  h′ , c′ , e′ →
+    α ⊢  h′ , c′ , e′  ↠  h″ , c″ , e″ →
     ∃₂ λ l′ m →
     α ≡ ☢ ×
-    c′ ≡ ↣⟨ ● (R , l′) , atomic (# m) ⟩ ×
-    h″ , c″ ≡ Update h′ l′ , ↣⟨ ○ , # m ⟩ ×
+    c′ , e′ ≡ ↣: ● (R , l′) , atomic (# m) ×
+    h″ , c″ , e″ ≡ Update h′ l′ , ↣: ○ , # m ×
     Consistent h′ l′ ×
     H⊢ ∅ , R ↣′⋆ l′ , # m
   extract R↣′⋆e α≢τ [] (↠-↣ (↣-step e↣e′)) = ⊥-elim (α≢τ ≡.refl)
@@ -57,14 +57,14 @@ private
   extract R↣′⋆e α≢τ (↠-↣ (↣-mutate h′)   ∷ c′↠⋆c″) c″↠c‴ = extract R↣′⋆e α≢τ c′↠⋆c″ c″↠c‴
   extract R↣′⋆e α≢τ (↠-↣ (↣-abort ¬cons) ∷ c′↠⋆c″) c″↠c‴ = extract [] α≢τ c′↠⋆c″ c″↠c‴
 
-↣-extract : ∀ {α h R h′ c′ h″ c″} →
+↣-extract : ∀ {α h R h′ c′ e′ h″ c″ e″} →
   α ≢ τ →
-  h , ↣⟨ ○ , atomic R ⟩ ↠⋆ h′ , c′ →
-  α ⊢ h′ , c′ ↠ h″ , c″ →
+  h , ↣: ○ , atomic R ↠⋆ h′ , c′ , e′ →
+  α ⊢ h′ , c′ , e′ ↠ h″ , c″ , e″ →
   ∃₂ λ l′ m →
   α ≡ ☢ ×
-  c′ ≡ ↣⟨ ● (R , l′) , atomic (# m) ⟩ ×
-  h″ , c″ ≡ Update h′ l′ , ↣⟨ ○ , # m ⟩ ×
+  c′ , e′ ≡ ↣: ● (R , l′) , atomic (# m) ×
+  h″ , c″ , e″ ≡ Update h′ l′ , ↣: ○ , # m ×
   Consistent h′ l′ ×
   H⊢ ∅ , R ↣′⋆ l′ , # m
 ↣-extract α≢τ [] (↠-↣ ↣-begin) = ⊥-elim (α≢τ ≡.refl)

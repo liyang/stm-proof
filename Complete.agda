@@ -6,11 +6,11 @@ open import Language
 -- Equivalence of _↦′_ and _↣′_
 
 -- Zero or more ↦-mutate rules followed by ↦-atomic.
-↦-extract : ∀ {α h₀ e h″ c″} →
-  α ⊢ h₀ , ↦⟨ atomic e ⟩ ⤇ h″ , c″ →
+↦-extract : ∀ {α h₀ e h″ c″ e″} →
+  α ⊢ h₀ , ↦: , atomic e ⤇ h″ , c″ , e″ →
   ∃₂ λ h m →
   α ≡ ☢ ×
-  c″ ≡ ↦⟨ # m ⟩ ×
+  c″ , e″ ≡ ↦: , # m ×
   Dec (h₀ ≡ h) ×
   h , e ↦′⋆ h″ , # m
 ↦-extract (⤇: α≢τ [] (↠-↦ (↦-mutate h₁))) = ⊥-elim (α≢τ ≡.refl)

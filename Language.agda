@@ -25,9 +25,10 @@ data Expression : Set where
 Transaction : Set
 Transaction = Maybe (Expression′ × Logs)
 
+infix 7 ↣:_
 data Combined : Set where
-  ↦⟨_⟩ : (e : Expression) → Combined
-  ↣⟨_,_⟩ : (t : Transaction) (e : Expression) → Combined
+  ↦: : Combined
+  ↣:_ : (t : Transaction) → Combined
 
 data Action : Set where
   τ : Action
@@ -138,24 +139,25 @@ data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
     ☢ ⊢  h , ● (R , l) , atomic (# m)  ↣  Update h l , ○ , # m
 
 infix 3 _⊢_↠_
-data _⊢_↠_ (α : Action) : Rel (Heap × Combined) where
+data _⊢_↠_ (α : Action) : Rel (Heap × Combined × Expression) where
   ↠-↦ : ∀ {h e h′ e′} →
-    (e↦e′ : α ⊢  h ,    e    ↦  h′ ,    e′)  →
-            α ⊢  h , ↦⟨ e ⟩  ↠  h′ , ↦⟨ e′ ⟩
+    (e↦e′ : α ⊢  h ,      e  ↦  h′ ,      e′)  →
+            α ⊢  h , ↦: , e  ↠  h′ , ↦: , e′
   ↠-↣ : ∀ {h t e h′ t′ e′} →
-    (e↣e′ : α ⊢  h ,    t , e    ↣  h′ ,    t′ , e′)  →
-            α ⊢  h , ↣⟨ t , e ⟩  ↠  h′ , ↣⟨ t′ , e′ ⟩
+    (e↣e′ : α ⊢  h ,    t , e  ↣  h′ ,    t′ , e′)  →
+            α ⊢  h , ↣: t , e  ↠  h′ , ↣: t′ , e′
 
 infix 3 _↠⋆_
-_↠⋆_ : Rel (Heap × Combined)
+_↠⋆_ : Rel (Heap × Combined × Expression)
 _↠⋆_ = Star (_⊢_↠_ τ)
 
 infix 3 _⊢_⤇_
-record _⊢_⤇_ (α : Action) (x x″ : Heap × Combined) : Set where
+record _⊢_⤇_ (α : Action) (x x″ : Heap × Combined × Expression) : Set where
   constructor ⤇:
   field
     {h′} : Heap
     {c′} : Combined
+    {e′} : Expression
     α≢τ : α ≢ τ
-    c↠⋆c′ : x ↠⋆ h′ , c′
-    c′↠c″ : α ⊢ h′ , c′ ↠ x″
+    e↠⋆e′ : x ↠⋆ h′ , c′ , e′
+    e′↠e″ : α ⊢ h′ , c′ , e′ ↠ x″
