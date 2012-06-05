@@ -32,6 +32,7 @@ data Combined : Set where
 
 data Action : Set where
   τ : Action
+  ⊞ : Action
   ☢ : Action
 
 infix 3 _↦′_
@@ -60,7 +61,7 @@ _↦′⋆_ = Star _↦′_
 infix 3 _⊢_↦_
 data _⊢_↦_ : Action → Rel (Heap × Expression) where
   ↦-ℕ : ∀ {h m n} →
-    τ ⊢ h , # m ⊕ # n  ↦  h , # (m + n)
+    ⊞ ⊢ h , # m ⊕ # n  ↦  h , # (m + n)
   ↦-R : ∀ {α h h′ b b′} m →
     (b↦b′ : α ⊢  h ,       b  ↦  h′ ,       b′)  →
             α ⊢  h , # m ⊕ b  ↦  h′ , # m ⊕ b′
@@ -117,8 +118,8 @@ h ⊢ l , e ↣′⋆ l′ , e′ = Star (_⊢_↣′_ h) (l , e) (l′ , e′)
 
 infix 3 _⊢_↣_
 data _⊢_↣_ : Action → Rel (Heap × Transaction × Expression) where
-  ↣-ℕ : ∀ {h t m n} →
-    τ ⊢  h , t , # m ⊕ # n  ↣  h , t , # (m + n)
+  ↣-ℕ : ∀ {h m n} →
+    ⊞ ⊢  h , ○ , # m ⊕ # n  ↣  h , ○ , # (m + n)
   ↣-R : ∀ {α h t b h′ t′ b′} m →
     (b↣b′ : α ⊢  h , t ,       b  ↣  h′ , t′ ,       b′)  →
             α ⊢  h , t , # m ⊕ b  ↣  h′ , t′ , # m ⊕ b′
