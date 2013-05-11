@@ -76,7 +76,7 @@ transaction {h} {e} = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
   ↦≼↣ : h , atomic e ⊢ ↦: ≼ ↣: ○
   ↦≼↣ {h″} e⤇e′ with ↦-extract e⤇e′
   ... | h₀ , m , ≡.refl , ≡.refl , h≟h₀ , e↦′⋆m with ↦′⋆→↣′⋆ ∅-Consistent ∅-Equivalent e↦′⋆m
-  ...   | l′ , cons′ , equiv′ , e↣′⋆m rewrite Commit-Update cons′ equiv′ ∶ h″ ≡ Update h₀ l′ = _ , e⤇m , #⊢↦≈↣ where
+  ...   | l′ , cons′ , equiv′ , e↣′⋆m rewrite h″ ≡ Update h₀ l′ ∋ Commit-Update cons′ equiv′ = _ , e⤇m , #⊢↦≈↣ where
 
     mutate? : ∀ {c′} → Dec (h ≡ h₀) →
       h₀ , ↣: ● (e , ∅) , atomic e ↠⋆ h₀ , c′ →
@@ -93,7 +93,7 @@ transaction {h} {e} = ♯ ↦≼↣ ∧ ♯ ↣≼↦ where
   ↣≼↦ : h , atomic e ⊢ ↣: ○ ≼ ↦:
   ↣≼↦ (⤇: {h′} α≢τ c↠⋆c′ c′↠c″) with ↣-extract α≢τ c↠⋆c′ c′↠c″
   ... | l′ , m , ≡.refl , ≡.refl , ≡.refl , cons , e↣⋆m with ↣′⋆→↦′⋆ ∅-Consistent ∅-Equivalent (↣′⋆-swap cons e↣⋆m)
-  ...   | h″ , _ , equiv , e↦′⋆m rewrite Commit-Update cons equiv ∶ h″ ≡ Update h′ l′ = _ , e⤇m , ≈-sym #⊢↦≈↣ where
+  ...   | h″ , _ , equiv , e↦′⋆m rewrite h″ ≡ Update h′ l′ ∋ Commit-Update cons equiv = _ , e⤇m , ≈-sym #⊢↦≈↣ where
 
     mutate? : ∀ {h₀} → Dec (h ≡ h₀) → h , ↦: , atomic e ↠⋆ h₀ , ↦: , atomic e
     mutate? (yes ≡.refl) = []

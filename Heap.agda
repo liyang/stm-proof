@@ -58,7 +58,7 @@ Equivalent h₀ l h′ = flip Vec.lookup h′ ≗ snd ∘ Read h₀ l
 
 private
   ∅[v]≡○ : ∀ {N} (v : Fin N) → Vec.lookup v (Vec.replicate ○) ≡ ○
-  ∅[v]≡○ v = Morphism.op-pure (Vec.lookup-morphism v) (○ ∶ Maybe ℕ)
+  ∅[v]≡○ v = Morphism.op-pure (Vec.lookup-morphism v) (Maybe ℕ ∋ ○)
 
 ∅-Consistent : ∀ {h} → Consistent h ∅
 ∅-Consistent v rewrite ∅[v]≡○ v = λ m ()
