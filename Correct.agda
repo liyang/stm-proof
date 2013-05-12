@@ -67,7 +67,8 @@ eval-left {h} {a} {b} a⊢↦≈↣ ∀b⊢↦≈↣ = ♯ ↦≼↣ ∧ ♯ ↣
   ... | inr (h′ , t′ , a′ , h″ , a″ , ≡.refl , ≡.refl , a↠⋆a′ , a′↠a″) with ♭ (≈→≽ a⊢↦≈↣) (⤇: α≢τ a↠⋆a′ a′↠a″)
   ...   | c″ , a⤇a″ , a″⊢↣≈↦ with ⤇∘↦-L b a⤇a″
   ...     | c″≡↦ , a⊕b⤇a″⊕b rewrite c″≡↦ = _ , a⊕b⤇a″⊕b , ↣≈↦ where
-    -- Termination checker can't see through ≈-sym, so we inline it.
+    -- The termination/productivity checker can't see through the outer ≈-sym in
+    -- ≈-sym (eval-left (≈-sym a″⊢↣≈↦) ∀b⊢↦≈↣) ; fortunately inlining it helps.
     ↦≈↣ = eval-left (≈-sym a″⊢↣≈↦) ∀b⊢↦≈↣
     ↣≈↦ = ≈→≽ ↦≈↣ ∧ ≈→≼ ↦≈↣
 
