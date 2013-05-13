@@ -1,7 +1,7 @@
-module Sound where
-
 open import Common
-open import Language
+module Sound (∣Heap∣ : ℕ) where
+
+open import Language ∣Heap∣
 
 -- sequence of ↣′ transitions with different heaps
 infix 3 H⊢_↣′_ H⊢_↣′⋆_

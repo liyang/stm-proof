@@ -1,7 +1,7 @@
-module Language where
-
 open import Common
-open import Heap public
+module Language (∣Heap∣ : ℕ) where
+
+open import Heap ∣Heap∣ public
 
 
 -- Expressions for IO and STM

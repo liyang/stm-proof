@@ -1,11 +1,11 @@
-module Correct where
-
 open import Common
-open import Language
-open import Lemmas
-open import Complete
-open import Sound
-open import Bisimilar
+module Correct (∣Heap∣ : ℕ) where
+
+open import Language ∣Heap∣
+open import Lemmas ∣Heap∣
+open import Complete ∣Heap∣
+open import Sound ∣Heap∣
+open import Bisimilar ∣Heap∣
 
 #⊢↦≈↣ : ∀ {h m} → h , # m ⊢ ↦: ≈ ↣: ○
 #⊢↦≈↣ = ♯ (⊥-elim ∘ #⤇̸) ∧ ♯ (⊥-elim ∘ #⤇̸)

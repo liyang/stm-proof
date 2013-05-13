@@ -1,7 +1,7 @@
-module Complete where
-
 open import Common
-open import Language
+module Complete (∣Heap∣ : ℕ) where
+
+open import Language ∣Heap∣
 
 -- Equivalence of _↦′_ and _↣′_
 

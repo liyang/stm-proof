@@ -1,7 +1,7 @@
-module Bisimilar where
-
 open import Common
-open import Language
+module Bisimilar (∣Heap∣ : ℕ) where
+
+open import Language ∣Heap∣
 
 mutual
   infix 4 _⊢_≼_ _⊢_≽_ _⊢_≈_

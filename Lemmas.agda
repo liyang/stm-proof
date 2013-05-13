@@ -1,7 +1,7 @@
-module Lemmas where
-
 open import Common
-open import Language
+module Lemmas (∣Heap∣ : ℕ) where
+
+open import Language ∣Heap∣
 
 -- No progress.
 

@@ -1,8 +1,5 @@
-module Heap where
-
 open import Common
-
-postulate ∣Heap∣ : ℕ
+module Heap (∣Heap∣ : ℕ) where
 
 Variable : Set
 Variable = Fin ∣Heap∣
